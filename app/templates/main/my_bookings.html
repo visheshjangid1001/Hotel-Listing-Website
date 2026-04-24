@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}My Bookings | D.T.E{% endblock %}
+{% block content %}
+<section class="listing-section">
+    <div class="container">
+        <div class="section-head reveal">
+            <div>
+                <p class="eyebrow">Reservation dashboard</p>
+                <h1>My bookings</h1>
+                <p class="section-copy">Track confirmed stays, review travel dates, and keep every reservation in one polished workspace.</p>
+            </div>
+        </div>
+
+        <div class="booking-list">
+            {% for booking in bookings %}
+                <article class="booking-item reveal">
+                    <img src="{{ booking.hotel.main_image_url }}" alt="{{ booking.hotel.name }}">
+                    <div>
+                        <h2>{{ booking.hotel.name }}</h2>
+                        <p>{{ booking.hotel.location }}, {{ booking.hotel.city }}</p>
+                        <p>{{ booking.check_in.strftime('%d %b %Y') }} to {{ booking.check_out.strftime('%d %b %Y') }}</p>
+                    </div>
+                    <div class="booking-summary">
+                        <strong>&#8377;{{ "%.0f"|format(booking.total_price|float) }}</strong>
+                        <span>{{ booking.status|title }}</span>
+                    </div>
+                </article>
+            {% else %}
+                <p class="empty-state reveal">You do not have any bookings yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

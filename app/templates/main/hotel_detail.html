@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}{{ hotel.name }} | D.T.E{% endblock %}
+{% block content %}
+<section class="detail-hero">
+    <div class="container reveal">
+        <p class="eyebrow">{{ hotel.city }}</p>
+        <div class="detail-heading">
+            <div>
+                <h1>{{ hotel.name }}</h1>
+                <p>{{ hotel.location }}</p>
+            </div>
+            <div class="detail-meta">
+                <span>{{ hotel.average_rating }} &#9733; average</span>
+                <span>{{ hotel.review_count }} reviews</span>
+                <strong>&#8377;{{ "%.0f"|format(hotel.price_per_night|float) }} / night</strong>
+            </div>
+        </div>
+        <div class="gallery-grid">
+            <img class="gallery-main" src="{{ hotel.main_image_url }}" alt="{{ hotel.name }}">
+            <div class="gallery-side">
+                {% for image in hotel.images[:4] %}
+                    <img src="{{ image.image_url }}" alt="{{ image.caption or hotel.name }}">
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="detail-section">
+    <div class="container detail-layout">
+        <div class="detail-content">
+            <article class="content-card reveal">
+                <h2>About this hotel</h2>
+                <p>{{ hotel.description }}</p>
+            </article>
+
+            <article class="content-card reveal">
+                <h2>Amenities</h2>
+                <div class="amenity-list large">
+                    {% for amenity in hotel.amenities %}
+                        <span>{{ amenity.name }}</span>
+                    {% endfor %}
+                </div>
+            </article>
+
+            <article class="content-card reveal">
+                <h2>Location</h2>
+                <div class="map-shell">
+                    <iframe
+                        src="https://maps.google.com/maps?q={{ hotel.latitude or hotel.city }},{{ hotel.longitude or '' }}&z=14&output=embed"
+                        loading="lazy"
+                        allowfullscreen
+                        referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </article>
+
+            <article class="content-card reveal">
+                <div class="review-head">
+                    <h2>Guest reviews</h2>
+                    <span>{{ hotel.average_rating }} / 5 average rating</span>
+                </div>
+                <div class="review-stack">
+                    {% for review in reviews %}
+                        <div class="review-item">
+                            <div class="review-meta">
+                                <strong>{{ review.user.full_name }}</strong>
+                                <span>{{ review.rating }} &#9733;</span>
+                            </div>
+                            <p>{{ review.comment }}</p>
+                        </div>
+                    {% else %}
+                        <p class="empty-state">No reviews yet. Be the first guest to leave one.</p>
+                    {% endfor %}
+                </div>
+
+                {% if current_user %}
+                    <form class="review-form" method="post" action="{{ url_for('main.add_review', hotel_id=hotel.id) }}">
+                        <label>
+                            <span>Your rating</span>
+                            <select name="rating" required>
+                                <option value="">Choose rating</option>
+                                {% for value in [5, 4, 3, 2, 1] %}
+                                    <option value="{{ value }}">{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <label>
+                            <span>Your review</span>
+                            <textarea name="comment" rows="4" placeholder="Share what stood out during your stay." required></textarea>
+                        </label>
+                        <button class="btn btn-primary" type="submit">Submit Review</button>
+                    </form>
+                {% else %}
+                    <p class="auth-helper">Please <a href="{{ url_for('auth.login', next=request.path) }}">log in</a> to review this hotel.</p>
+                {% endif %}
+            </article>
+        </div>
+
+        <aside class="booking-card reveal reveal-delay-1">
+            <h2>Book this stay</h2>
+            <form method="post" action="{{ url_for('main.book_hotel', hotel_id=hotel.id) }}" data-price="{{ hotel.price_per_night|float }}" id="booking-form">
+                <label>
+                    <span>Check-in</span>
+                    <input type="date" name="check_in" min="{{ today.isoformat() }}" required>
+                </label>
+                <label>
+                    <span>Check-out</span>
+                    <input type="date" name="check_out" min="{{ today.isoformat() }}" required>
+                </label>
+                <div class="booking-total">
+                    <span>Total price</span>
+                    <strong id="booking-total">&#8377;0</strong>
+                </div>
+                <button class="btn btn-primary btn-block" type="submit">Book Now</button>
+            </form>
+            <p class="booking-note">Bookings are confirmed instantly and stored in your dashboard.</p>
+        </aside>
+    </div>
+</section>
+{% endblock %}

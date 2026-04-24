@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Browse Hotels | D.T.E{% endblock %}
+{% block content %}
+<section class="hero-section">
+    <div class="container hero-grid">
+        <div class="hero-copy-block reveal">
+            <div class="hero-kicker">Modern stay discovery across India</div>
+            <p class="eyebrow">Destination Travel Experience</p>
+            <h1>Find standout hotels with a cleaner, more premium browsing flow.</h1>
+            <p class="hero-copy">D.T.E now feels more editorial and more useful: richer hotel cards, sharper typography, faster scanning, and a broader collection of stays across business, beach, hill, and heritage destinations.</p>
+            <div class="hero-subgrid">
+                <div class="hero-metrics">
+                    <div class="metric-card">
+                        <strong>{{ hotels|length }}</strong>
+                        <span>Hotels live now</span>
+                    </div>
+                    <div class="metric-card">
+                        <strong>{{ cities|length }}</strong>
+                        <span>Destination hubs</span>
+                    </div>
+                    <div class="metric-card">
+                        <strong>{{ amenities|length }}</strong>
+                        <span>Guest filters</span>
+                    </div>
+                </div>
+                <div class="curated-item">
+                    <strong>Curated collections</strong>
+                    <p class="section-copy">Use search, city, rating, and amenity filters together to move from inspiration to shortlist quickly.</p>
+                </div>
+            </div>
+        </div>
+        <div class="reveal reveal-delay-1">
+            <article class="hero-editorial-card">
+                <div class="hero-editorial-content">
+                    <div class="hero-chip-row">
+                        <span>Business ready</span>
+                        <span>Resort escapes</span>
+                        <span>Heritage stays</span>
+                    </div>
+                    <h2>Stay in places that look considered before you even book.</h2>
+                    <p>Explore larger inventory with clearer pricing, reliable amenity signals, and hotel pages that feel less dated and more intentional.</p>
+                    <div class="hero-actions">
+                        <a class="btn btn-primary" href="#hotel-results">Browse Collection</a>
+                        <span class="hero-note">Fresh visual system and 24 seeded hotels</span>
+                    </div>
+                </div>
+            </article>
+            <form class="search-panel" method="get" action="{{ url_for('main.hotel_list') }}">
+                <div class="panel-head">
+                    <div>
+                        <p class="eyebrow">Smart search</p>
+                        <h2>Refine your shortlist</h2>
+                    </div>
+                    <span class="panel-badge">Live suggestions</span>
+                </div>
+                <label>
+                    <span>Search hotel or city</span>
+                    <div class="autocomplete-shell">
+                        <input id="hotel-search" type="text" name="q" value="{{ filters.q }}" placeholder="Delhi, Jaipur, Lakeview..." autocomplete="off">
+                        <div id="search-suggestions" class="suggestions"></div>
+                    </div>
+                </label>
+                <div class="filter-grid">
+                    <label>
+                        <span>City</span>
+                        <select name="city">
+                            <option value="">All cities</option>
+                            {% for city in cities %}
+                                <option value="{{ city }}" {% if filters.city == city %}selected{% endif %}>{{ city }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label>
+                        <span>Minimum rating</span>
+                        <select name="rating">
+                            <option value="">Any</option>
+                            {% for rating in [5, 4, 3, 2] %}
+                                <option value="{{ rating }}" {% if filters.rating == rating|string %}selected{% endif %}>{{ rating }}+</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label>
+                        <span>Min price</span>
+                        <input type="number" min="0" name="min_price" value="{{ filters.min_price }}" placeholder="2500">
+                    </label>
+                    <label>
+                        <span>Max price</span>
+                        <input type="number" min="0" name="max_price" value="{{ filters.max_price }}" placeholder="12000">
+                    </label>
+                </div>
+                <div class="amenity-group">
+                    {% for amenity in amenities %}
+                        <label class="checkbox-chip">
+                            <input type="checkbox" name="amenity" value="{{ amenity.name }}" {% if amenity.name in filters.amenity %}checked{% endif %}>
+                            <span>{{ amenity.name }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+                <button class="btn btn-primary" type="submit">Search Hotels</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="listing-section" id="hotel-results">
+    <div class="container">
+        <div class="section-head reveal">
+            <div>
+                <p class="eyebrow">Available stays</p>
+                <h2>{{ hotels|length }} hotels found</h2>
+                <p class="section-copy">Shortlist properties with clearer visuals, broader city coverage, dependable amenities, and stronger guest feedback signals.</p>
+            </div>
+        </div>
+
+        <div class="curated-bar reveal">
+            <div class="curated-item">
+                <strong>City-ready stays</strong>
+                <p>Fast filters help guests compare central hotels for work trips, events, and short urban stays.</p>
+            </div>
+            <div class="curated-item">
+                <strong>Leisure picks</strong>
+                <p>Beach, hill, lake, and spa-forward hotels now sit in the same streamlined catalog.</p>
+            </div>
+            <div class="curated-item">
+                <strong>Modern browsing</strong>
+                <p>Stronger card hierarchy makes pricing, location, rating, and amenities easier to scan.</p>
+            </div>
+        </div>
+
+        <div class="hotel-grid">
+            {% for hotel in hotels %}
+                <article class="hotel-card reveal">
+                    <div class="hotel-card-media">
+                        <img src="{{ hotel.main_image_url }}" alt="{{ hotel.name }}">
+                        <div class="hotel-card-gradient"></div>
+                        <div class="hotel-card-badges">
+                            <span class="hotel-tag">{{ hotel.city }}</span>
+                            <span class="rating-badge">{{ hotel.average_rating or 0 }} &#9733;</span>
+                        </div>
+                    </div>
+                    <div class="hotel-card-body">
+                        <div class="hotel-card-top">
+                            <div>
+                                <h3>{{ hotel.name }}</h3>
+                                <p>{{ hotel.location }}, {{ hotel.city }}</p>
+                            </div>
+                        </div>
+                        <div class="amenity-list">
+                            {% for amenity in hotel.amenities[:4] %}
+                                <span>{{ amenity.name }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="hotel-card-meta">
+                            <div class="price-stack">
+                                <strong>&#8377;{{ "%.0f"|format(hotel.price_per_night|float) }}</strong>
+                                <span>per night</span>
+                            </div>
+                            <a class="btn btn-secondary" href="{{ url_for('main.hotel_detail', hotel_id=hotel.id) }}">View Details</a>
+                        </div>
+                    </div>
+                </article>
+            {% else %}
+                <p class="empty-state reveal">No hotels match the current search and filters.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
